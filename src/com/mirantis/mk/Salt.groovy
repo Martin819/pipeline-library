@@ -61,7 +61,6 @@ def saltLogin(master) {
  */
 
 def runSaltCommand(saltId, client, target, function, batch = null, args = null, kwargs = null, timeout = -1, read_timeout = -1) {
-    def common = new com.mirantis.mk.Common()
     data = [
         'tgt': target.expression,
         'fun': function,
@@ -70,33 +69,23 @@ def runSaltCommand(saltId, client, target, function, batch = null, args = null, 
     ]
     // Decide automatically batchSize based on workerThreads and targetedMinions
     if (batch == null) {
-        common.warningMsg("batch == null")
-        workerThreads = '10'
-        common.warningMsg("env: ${env.getEnvironment()}")
-        if (env.getEnvironment().containsKey('WORKER_THREADS') && !env['WORKER_THREADS'].isEmpty()) {
-            common.warningMsg("WORKER_THREADS is valid and not empty")
-            workerThreads = env['WORKER_THREADS']
+        batch = '20'
+        if (env.getEnvironment().containsKey('SALT_MASTER_OPT_WORKER_THREADS') && !env['SALT_MASTER_OPT_WORKER_THREADS'].isEmpty()) {
+            batch = env['SALT_MASTER_OPT_WORKER_THREADS']
         }
-        targetedMinions = executeSaltCommand(saltId, ['tgt': target.expression, 'fun': 'test.ping', 'client': client, 'expr_form': target.type])['return'][0]
-        common.warningMsg("targetedMinions: ${targetedMinions}")
-        if (workerThreads.isInteger()) {
-            common.warningMsg("workerThreads value is Integer: ${workerThreads}")
-            if (targetedMinions.size() > workerThreads.toInteger()) {
-                common.warningMsg("targetedMinions.size() > workerThreads")
-                batch = workerThreads
-                common.warningMsg("batchSize inside clause: ${batch}")
-            }
-        } else {
-            batch = '15'
-        }
+        // targetedMinions = executeSaltCommand(saltId, ['tgt': target.expression, 'fun': 'test.ping', 'client': client, 'expr_form': target.type])['return'][0]
+        // if (workerThreads.isInteger()) {
+        //     if (targetedMinions.size() > workerThreads.toInteger()) {
+        //         batch = workerThreads
+        //     }
+        // } else {
+        //     batch = '20'
+        // }
     }
-    common.warningMsg("batchSize outside clause: ${batch}")
     // Adjust data configuration
     if (batch != null) {
-        common.warningMsg("batch != null: ${batch}")
         batch = batch.toString()
         if ((batch.isInteger() && batch.toInteger() > 0) || (batch.contains("%"))){
-            common.warningMsg("batch is correctly formatted")
             data['client']= "local_batch"
             data['batch'] = batch
         }
@@ -113,16 +102,15 @@ def runSaltCommand(saltId, client, target, function, batch = null, args = null, 
     if (timeout != -1) {
         data['timeout'] = timeout
     }
-    common.warningMsg("data: ${data}")
+
     executeSaltCommand(saltId, data)
-    // Command will be sent using HttpRequest
 }
 
 @NonCPS
 def executeSaltCommand(saltId, data) {
 
     if (saltId instanceof HashMap && saltId.containsKey("authToken") ) {
-
+        // Command will be sent using HttpRequest
         def headers = [
           'X-Auth-Token': "${saltId.authToken}"
         ]
@@ -152,7 +140,6 @@ def executeSaltCommand(saltId, data) {
  * @return output of salt command
  */
 def getPillar(saltId, target, pillar = null, batch = null) {
-    def common = new com.mirantis.mk.Common()
     if (pillar != null) {
         return runSaltCommand(saltId, 'local', ['expression': target, 'type': 'compound'], 'pillar.get', batch, [pillar.replace('.', ':')])
     } else {
