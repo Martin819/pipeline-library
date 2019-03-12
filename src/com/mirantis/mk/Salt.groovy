@@ -103,6 +103,7 @@ def runSaltCommand(saltId, client, target, function, batch = null, args = null, 
         data['timeout'] = timeout
     }
 
+    common.warningMsg("Executing Command: ${data}")
     executeSaltCommand(saltId, data)
 }
 
