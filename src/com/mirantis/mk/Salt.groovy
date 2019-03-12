@@ -61,6 +61,7 @@ def saltLogin(master) {
  */
 
 def runSaltCommand(saltId, client, target, function, batch = null, args = null, kwargs = null, timeout = -1, read_timeout = -1) {
+    def common = new com.mirantis.mk.Common()
     data = [
         'tgt': target.expression,
         'fun': function,
