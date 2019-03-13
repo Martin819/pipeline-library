@@ -128,6 +128,7 @@ def executeSaltCommand(saltId, data) {
     // Convert returned Object to the same structure as from 'local' client to keep compatibility
     if (data['client'].equals('local_batch')) {
         resultMap = ['return': [[]]]
+        common.warningMsg(result)
         result['return'].each { it -> resultMap['return'][0] = it + resultMap['return'][0] }
         return resultMap
     }
