@@ -105,7 +105,15 @@ def runSaltCommand(saltId, client, target, function, batch = null, args = null, 
     }
 
     common.warningMsg("Executing Command: ${data}")
-    executeSaltCommand(saltId, data)
+    result = executeSaltCommand(saltId, data)
+    // Convert returned Object to the same structure as from 'local' client to keep compatibility
+    if (data['client'].equals('local_batch')) {
+        resultMap = ['return': [[:]]]
+        result['return'].each { it -> resultMap['return'][0] = it + resultMap['return'][0] }
+        return resultMap
+    } else {
+        return result
+    }
 }
 
 @NonCPS
@@ -123,12 +131,6 @@ def executeSaltCommand(saltId, data) {
     } else {
         // Command will be sent using Pepper
         result = runPepperCommand(data, saltId)
-    }
-    // Convert returned Object to the same structure as from 'local' client to keep compatibility
-    if (data['client'].equals('local_batch')) {
-        resultMap = ['return': [[:]]]
-        result['return'].each { it -> resultMap['return'][0] = it + resultMap['return'][0] }
-        return resultMap
     }
     return result
 }
