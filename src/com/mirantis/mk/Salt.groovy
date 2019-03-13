@@ -110,7 +110,6 @@ def runSaltCommand(saltId, client, target, function, batch = null, args = null, 
 
 @NonCPS
 def executeSaltCommand(saltId, data) {
-    def common = new com.mirantis.mk.Common()
     if (saltId instanceof HashMap && saltId.containsKey("authToken") ) {
         // Command will be sent using HttpRequest
         def headers = [
@@ -128,7 +127,6 @@ def executeSaltCommand(saltId, data) {
     // Convert returned Object to the same structure as from 'local' client to keep compatibility
     if (data['client'].equals('local_batch')) {
         resultMap = ['return': [[]]]
-        common.warningMsg(result)
         result['return'].each { it -> resultMap['return'][0] = it + resultMap['return'][0] }
         return resultMap
     }
@@ -697,7 +695,9 @@ def enforceHighstate(saltId, target, output = false, failOnError = true, batch =
  * @return list of active minions fitin
  */
 def getMinions(saltId, target, batch = null) {
+    def common = new com.mirantis.mk.Common()
     def minionsRaw = runSaltCommand(saltId, 'local', ['expression': target, 'type': 'compound'], 'test.ping', batch)
+    common.infoMsg(minionsRaw)
     return new ArrayList<String>(minionsRaw['return'][0].keySet())
 }
 
