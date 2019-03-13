@@ -109,7 +109,7 @@ def runSaltCommand(saltId, client, target, function, batch = null, args = null, 
 }
 
 def executeSaltCommand(saltId, data) {
-
+    def common = new com.mirantis.mk.Common()
     if (saltId instanceof HashMap && saltId.containsKey("authToken") ) {
         // Command will be sent using HttpRequest
         def headers = [
