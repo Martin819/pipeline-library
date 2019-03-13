@@ -108,7 +108,6 @@ def runSaltCommand(saltId, client, target, function, batch = null, args = null, 
     executeSaltCommand(saltId, data)
 }
 
-@NonCPS
 def executeSaltCommand(saltId, data) {
 
     if (saltId instanceof HashMap && saltId.containsKey("authToken") ) {
